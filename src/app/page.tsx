@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
  
 
   // Clubhouse-style Avatar Animation Interface
@@ -23,7 +24,7 @@ import React from "react";
   }
 
 export default function Home() {
-  const [showAvatars, setShowAvatars] = React.useState(true);
+  const [showAvatars] = React.useState(true);
   const [avatars, setAvatars] = React.useState<Avatar[]>([]);
   const [isScrolled, setIsScrolled] = React.useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
@@ -102,7 +103,7 @@ export default function Home() {
   React.useEffect(() => {
     if (!showAvatars) return;
 
-    let animationIntervals: NodeJS.Timeout[] = [];
+    const animationIntervals: NodeJS.Timeout[] = [];
     let avatarIdCounter = 0;
     let occupiedAreas: { groupId: number; x1: number; y1: number; x2: number; y2: number }[] = [];
 
@@ -428,9 +429,11 @@ export default function Home() {
           }}>
             {/* Left side - Logo */}
             <div style={{ display: 'flex', alignItems: 'center' }}>
-              <img
-                src={'/images/Collective logo v5 White (2).png'}
+              <Image
+                src="/images/Collective logo v5 White (2).png"
                 alt="Collective logo"
+                width={120}
+                height={32}
                 style={{
                   height: '32px',
                   width: 'auto',
@@ -871,9 +874,11 @@ export default function Home() {
             alignItems: 'center'
           }}>
             {/* Logo above tagline */}
-            <img
-              src={'/images/Collective logo v5 White (2).png'}
+            <Image
+              src="/images/Collective logo v5 White (2).png"
               alt="Collective logo"
+              width={200}
+              height={56}
               style={{
                 height: isClient && windowWidth <= 768 ? '48px' : '56px',
                 width: 'auto',
@@ -964,12 +969,13 @@ export default function Home() {
                 pointerEvents: 'none'
               }}
             >
-              <img
+              <Image
                 src={avatarImages[avatar.id % avatarImages.length]}
                 alt="avatar"
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                fill
+                style={{ objectFit: 'cover' }}
                 loading="eager"
-                decoding="async"
+                unoptimized
               />
             </div>
           );
@@ -994,27 +1000,27 @@ export default function Home() {
             <div className="initial-child-container">
               <div className="child" style={{ transform: 'none' }}>
                 <a href="https://www.fastcompany.com/90774866/four-radical-chrome-alternatives-to-reboot-your-web-browser" target="_blank" rel="noreferrer" tabIndex={-1} className="c-jvmdN">
-                  "Collective has transformed how I connect with my supporters" — Fast Company
+                  &ldquo;Collective has transformed how I connect with my supporters&rdquo; — Fast Company
                 </a>
               </div>
               <div className="child" style={{ transform: 'none' }}>
                 <a href="https://techcrunch.com" target="_blank" rel="noreferrer" tabIndex={-1} className="c-jvmdN">
-                  "Revolutionary community platform" — TechCrunch
+                  &ldquo;Revolutionary community platform&rdquo; — TechCrunch
                 </a>
               </div>
               <div className="child" style={{ transform: 'none' }}>
                 <a href="https://www.theverge.com" target="_blank" rel="noreferrer" tabIndex={-1} className="c-jvmdN">
-                  "The future of creator communities" — The Verge
+                  &ldquo;The future of creator communities&rdquo; — The Verge
                 </a>
               </div>
               <div className="child" style={{ transform: 'none' }}>
                 <a href="https://www.wired.com" target="_blank" rel="noreferrer" tabIndex={-1} className="c-jvmdN">
-                  "Beautiful, intuitive, powerful" — Wired
+                  &ldquo;Beautiful, intuitive, powerful&rdquo; — Wired
                 </a>
               </div>
               <div className="child" style={{ transform: 'none' }}>
                 <a href="https://www.bloomberg.com" target="_blank" rel="noreferrer" tabIndex={-1} className="c-jvmdN">
-                  "Game-changing community tools" — Bloomberg
+                  &ldquo;Game-changing community tools&rdquo; — Bloomberg
                 </a>
               </div>
             </div>
@@ -1062,7 +1068,7 @@ export default function Home() {
             maxWidth: '600px',
             lineHeight: '1.6'
           }}>
-            Create meaningful connections and give back to your supporters with Collective's powerful community tools.
+            Create meaningful connections and give back to your supporters with Collective&apos;s powerful community tools.
           </p>
         </div>
 
