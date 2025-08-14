@@ -1,103 +1,1074 @@
-import Image from "next/image";
+"use client";
+
+import React from "react";
+ 
+
+  // Clubhouse-style Avatar Animation Interface
+  interface Avatar {
+    id: number;
+    x: number;
+    y: number;
+    size: number;
+    color: string;
+    initialDelay: number;
+    bounceDelay: number;
+    destinationDelay: number;
+    bounceDirection: 'left' | 'right';
+    bounceOffset: { x: number; y: number; rotate: number };
+    finalPosition: { x: number; y: number };
+    phase: 'waiting' | 'bouncing' | 'settling' | 'complete' | 'fading';
+    groupIndex: number;
+    opacity: number;
+    transform: string;
+  }
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [showAvatars, setShowAvatars] = React.useState(true);
+  const [avatars, setAvatars] = React.useState<Avatar[]>([]);
+  const [isScrolled, setIsScrolled] = React.useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+  // Helper functions for animation
+  const randomBetween = (min: number, max: number) => Math.random() * (max - min) + min;
+  
+  const getCubicBezier = () => {
+    const p1 = randomBetween(0.2, 0.3);
+    const p2 = randomBetween(0.62, 0.72);
+    const p3 = randomBetween(0.51, 0.61);
+    return `cubic-bezier(${p1}, ${p2}, ${p3}, 1)`;
+  };
+
+  // Removed complex scroll system - using Arc's simple document flow approach
+
+  // Stock avatar image URLs (young people)
+  const avatarImages: string[] = [
+    'https://randomuser.me/api/portraits/women/44.jpg',
+    'https://randomuser.me/api/portraits/men/32.jpg',
+    'https://randomuser.me/api/portraits/women/65.jpg',
+    'https://randomuser.me/api/portraits/men/12.jpg',
+    'https://randomuser.me/api/portraits/women/29.jpg',
+    'https://randomuser.me/api/portraits/men/28.jpg',
+    'https://randomuser.me/api/portraits/women/19.jpg',
+    'https://randomuser.me/api/portraits/men/53.jpg',
+    'https://randomuser.me/api/portraits/women/15.jpg',
+    'https://randomuser.me/api/portraits/men/45.jpg',
+    'https://randomuser.me/api/portraits/women/31.jpg',
+    'https://randomuser.me/api/portraits/men/21.jpg',
+    'https://randomuser.me/api/portraits/women/24.jpg',
+    'https://randomuser.me/api/portraits/men/40.jpg',
+    'https://randomuser.me/api/portraits/women/52.jpg',
+    'https://randomuser.me/api/portraits/men/35.jpg'
+  ];
+
+  // Helper function to determine if an avatar should have a metallic border
+  const shouldHaveMetallicBorder = (avatarId: number, groupIndex: number) => {
+    // Give the first avatar in each group a metallic border
+    return avatarId === groupIndex;
+  };
+
+  // Window size state for responsive behavior
+  const [windowWidth, setWindowWidth] = React.useState(1024);
+  const [isClient, setIsClient] = React.useState(false);
+
+  // Client-side initialization and event listeners
+  React.useEffect(() => {
+    // Set client-side flag and initial window width
+    setIsClient(true);
+    setWindowWidth(window.innerWidth);
+
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      setIsScrolled(scrollPosition > 50);
+    };
+
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+      // Close mobile menu when resizing to desktop
+      if (window.innerWidth > 768) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('resize', handleResize);
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  // Continuous overlapping avatar animation waves
+  React.useEffect(() => {
+    if (!showAvatars) return;
+
+    let animationIntervals: NodeJS.Timeout[] = [];
+    let avatarIdCounter = 0;
+    let occupiedAreas: { groupId: number; x1: number; y1: number; x2: number; y2: number }[] = [];
+
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+    const baseAvatarSize = Math.max(48, Math.min(96, 64 + (windowWidth / 1920) * 32));
+    const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F'];
+    
+
+
+    const getBounceOffset = (bounceDirection: 'left' | 'right', size: number) => {
+      const edgeMargin = Math.max(12, Math.min(50, windowWidth * 0.04));
+      const rightEdge = windowWidth - size - edgeMargin;
+      const leftEdge = edgeMargin;
+      const yPosition = randomBetween(0.4 * windowHeight, 0.6 * windowHeight);
+      const rotation = randomBetween(-90, 90);
+      
+      return {
+        x: bounceDirection === 'right' ? rightEdge : leftEdge,
+        y: yPosition,
+        rotate: rotation
+      };
+    };
+
+    // Generate random settling point in the bottom third of the screen, avoiding text area and existing groups
+    const getRandomSettlingPoint = (groupWidth: number, groupHeight: number) => {
+      const isMobile = windowWidth <= 768;
+      const margin = Math.max(16, Math.min(150, windowWidth * 0.08));
+      const padding = isMobile ? 8 : 16; // smaller gap between groups on mobile
+
+      const minCenterX = margin + groupWidth / 2;
+      const maxCenterX = (windowWidth - margin) - groupWidth / 2;
+
+      const bottomThirdMin = windowHeight * (2 / 3);
+      const bottomThirdMax = windowHeight - margin;
+      const minCenterY = Math.max(bottomThirdMin + groupHeight / 2, margin + groupHeight / 2);
+      const maxCenterY = bottomThirdMax - groupHeight / 2;
+
+      // Define text area to avoid (center of screen)
+      const textAreaCenterX = windowWidth / 2;
+      const textAreaCenterY = windowHeight / 2;
+      const textAvoidRadius = isMobile ? Math.min(200, windowHeight * 0.15) : Math.min(300, windowHeight * 0.22);
+
+      let attempts = 0;
+      let centerX = minCenterX;
+      let centerY = minCenterY;
+
+      const intersects = (
+        a: { x1: number; y1: number; x2: number; y2: number },
+        b: { x1: number; y1: number; x2: number; y2: number }
+      ) => {
+        return !(
+          a.x2 + padding < b.x1 ||
+          a.x1 - padding > b.x2 ||
+          a.y2 + padding < b.y1 ||
+          a.y1 - padding > b.y2
+        );
+      };
+
+      // If the space is too tight horizontally/vertically, clamp centers within screen bounds
+      const safeMinCenterX = Math.min(minCenterX, Math.max(minCenterX, windowWidth / 2));
+      const safeMaxCenterX = Math.max(maxCenterX, Math.min(maxCenterX, windowWidth / 2));
+      const safeMinCenterY = Math.min(minCenterY, Math.max(minCenterY, windowHeight * 0.8));
+      const safeMaxCenterY = Math.max(maxCenterY, Math.min(maxCenterY, windowHeight * 0.9));
+
+      while (attempts < (isMobile ? 200 : 120)) {
+        const minCX = minCenterX <= maxCenterX ? minCenterX : safeMinCenterX;
+        const maxCX = minCenterX <= maxCenterX ? maxCenterX : safeMaxCenterX;
+        const minCY = minCenterY <= maxCenterY ? minCenterY : safeMinCenterY;
+        const maxCY = minCenterY <= maxCenterY ? maxCenterY : safeMaxCenterY;
+
+        centerX = randomBetween(minCX, maxCX);
+        centerY = randomBetween(minCY, maxCY);
+
+        const distanceFromText = Math.sqrt(
+          Math.pow(centerX - textAreaCenterX, 2) +
+          Math.pow(centerY - textAreaCenterY, 2)
+        );
+
+        const candidate = {
+          x1: centerX - (groupWidth - 0) / 2,
+          y1: centerY - (groupHeight - 0) / 2,
+          x2: centerX - (groupWidth - 0) / 2 + groupWidth,
+          y2: centerY - (groupHeight - 0) / 2 + groupHeight,
+        };
+
+        const overlapsExisting = occupiedAreas.some((area) => intersects(candidate, area));
+
+        if (distanceFromText >= textAvoidRadius && !overlapsExisting) break;
+        attempts++;
+      }
+
+      if (attempts >= (isMobile ? 200 : 120)) return null;
+      return { centerX, centerY };
+    };
+
+    // Create a single group of avatars
+    const createAvatarGroup = (): Avatar[] | null => {
+      const isMobile = windowWidth <= 768;
+      const avatarsPerGroup = isMobile ? 9 : 5;
+      const groupId = avatarIdCounter;
+      avatarIdCounter += avatarsPerGroup;
+
+      // Grid formation (precompute to choose a valid center)
+      let groupAvatarSize = baseAvatarSize;
+      let spacing = groupAvatarSize;
+      const gridCols = Math.ceil(Math.sqrt(avatarsPerGroup));
+      const gridRows = Math.ceil(avatarsPerGroup / gridCols);
+      let gridWidth = (gridCols - 1) * spacing + groupAvatarSize; // include avatar size for full width
+      let gridHeight = (gridRows - 1) * spacing + groupAvatarSize; // include avatar size for full height
+
+      // Adjust group size to fit available bottom third area if needed
+      const margin = Math.max(16, Math.min(150, windowWidth * 0.08));
+      const allowedWidth = (windowWidth - margin * 2);
+      const allowedHeight = (windowHeight - margin) - (windowHeight * (2 / 3));
+      const scaleFactor = Math.min(
+        allowedWidth / gridWidth,
+        allowedHeight / gridHeight,
+        1
+      );
+      if (scaleFactor < 1) {
+        groupAvatarSize = Math.max(36, groupAvatarSize * scaleFactor);
+        spacing = groupAvatarSize;
+        gridWidth = (gridCols - 1) * spacing + groupAvatarSize;
+        gridHeight = (gridRows - 1) * spacing + groupAvatarSize;
+      }
+
+      const settlingPoint = getRandomSettlingPoint(gridWidth, gridHeight);
+      if (!settlingPoint) {
+        return null; // No valid non-overlapping position found
+      }
+      const { centerX, centerY } = settlingPoint;
+      
+      const groupAvatars = Array.from({ length: avatarsPerGroup }, (_, i) => {
+        const startX = randomBetween(groupAvatarSize, Math.max(groupAvatarSize + 1, windowWidth - groupAvatarSize));
+        const startY = -groupAvatarSize - 50;
+        
+        const col = i % gridCols;
+        const row = Math.floor(i / gridCols);
+
+        const innerGridWidth = (gridCols - 1) * spacing;
+        const innerGridHeight = (gridRows - 1) * spacing;
+        const finalX = centerX - innerGridWidth / 2 + col * spacing;
+        const finalY = centerY - innerGridHeight / 2 + row * spacing;
+        
+        const initialDelay = randomBetween(0.25, 1) * 1000;
+        const bounceDelay = randomBetween(1.5, 4.25) * 1000;
+        const destinationDelay = 1.5 * bounceDelay;
+        const bounceDirection: 'left' | 'right' = Math.random() > 0.5 ? 'right' : 'left';
+        const bounceOffset = getBounceOffset(bounceDirection, groupAvatarSize);
+
+        return {
+          id: groupId + i,
+          x: startX,
+          y: startY,
+          size: groupAvatarSize,
+          color: colors[(groupId + i) % colors.length],
+          initialDelay,
+          bounceDelay,
+          destinationDelay,
+          bounceDirection,
+          bounceOffset,
+          finalPosition: { x: finalX, y: finalY },
+          phase: 'waiting' as const,
+          groupIndex: groupId,
+          opacity: 1,
+          transform: `translate(${startX}px, ${startY}px) rotate(0deg)`
+        };
+      });
+
+      // Register occupied area for this group to avoid overlaps with future groups
+      const area = {
+        groupId,
+        x1: Math.max(0, centerX - gridWidth / 2),
+        y1: Math.max(0, centerY - gridHeight / 2),
+        x2: Math.min(windowWidth, centerX - gridWidth / 2 + gridWidth),
+        y2: Math.min(windowHeight, centerY - gridHeight / 2 + gridHeight),
+      };
+      occupiedAreas.push(area);
+
+      return groupAvatars;
+    };
+
+    // Animate a single group using React state only
+    const animateGroup = (groupAvatars: typeof avatars) => {
+      // Add avatars to state
+      setAvatars(prev => [...prev, ...groupAvatars]);
+
+      // Start individual avatar animations using state updates
+      groupAvatars.forEach((avatar) => {
+        // Phase 1: Start bounce after initial delay
+        setTimeout(() => {
+          setAvatars(prev => prev.map(a => 
+            a.id === avatar.id ? { 
+              ...a, 
+              phase: 'bouncing',
+              transform: `translate(${avatar.bounceOffset.x}px, ${avatar.bounceOffset.y}px) rotate(${avatar.bounceOffset.rotate}deg)`
+            } : a
+          ));
+
+          // Phase 2: Settle to final position
+          setTimeout(() => {
+            setAvatars(prev => prev.map(a => 
+              a.id === avatar.id ? { 
+                ...a, 
+                phase: 'settling',
+                transform: `translate(${avatar.finalPosition.x}px, ${avatar.finalPosition.y}px) rotate(0deg)`
+              } : a
+            ));
+
+            // Phase 3: Mark as complete
+            setTimeout(() => {
+              setAvatars(prev => prev.map(a => 
+                a.id === avatar.id ? { ...a, phase: 'complete' } : a
+              ));
+            }, avatar.destinationDelay);
+          }, avatar.bounceDelay);
+        }, avatar.initialDelay);
+      });
+
+      // Set up group fade out using state
+      const maxSettleTime = Math.max(...groupAvatars.map(a => 
+        a.initialDelay + a.bounceDelay + a.destinationDelay
+      ));
+      
+      setTimeout(() => {
+        // Start fade
+        setAvatars(prev => prev.map(a => 
+          groupAvatars.some(ga => ga.id === a.id) ? { ...a, phase: 'fading', opacity: 0 } : a
+        ));
+        
+        // Remove from state after fade completes
+        setTimeout(() => {
+          setAvatars(prev => prev.filter(a => !groupAvatars.some(ga => ga.id === a.id)));
+          // Free up occupied area for this group
+          const groupId = groupAvatars[0]?.groupIndex;
+          occupiedAreas = occupiedAreas.filter(area => area.groupId !== groupId);
+        }, 1000);
+      }, maxSettleTime + 3000);
+    };
+
+    // Start continuous animation waves
+    const startContinuousAnimation = () => {
+      const isMobile = windowWidth <= 768;
+      let groupsCreated = 0;
+
+      const createAndAnimateGroup = () => {
+        const newGroup = createAvatarGroup();
+        if (newGroup) {
+          groupsCreated++;
+          animateGroup(newGroup);
+          console.log(`Mobile group ${groupsCreated} created with ${newGroup.length} avatars`);
+        } else {
+          console.log(`Failed to create group ${groupsCreated + 1} - no valid position found`);
+        }
+      };
+
+      // Create initial groups more aggressively on mobile
+      if (isMobile) {
+        // Create 3 groups with staggered timing
+        createAndAnimateGroup(); // First group immediately
+        setTimeout(() => createAndAnimateGroup(), 1000); // Second group after 1s
+        setTimeout(() => createAndAnimateGroup(), 2000); // Third group after 2s
+        
+        // Then continue with regular interval
+        setTimeout(() => {
+          const groupInterval = setInterval(createAndAnimateGroup, 4000);
+          animationIntervals.push(groupInterval);
+        }, 3000);
+      } else {
+        // Desktop behavior - start immediately and continue
+        createAndAnimateGroup();
+        const groupInterval = setInterval(createAndAnimateGroup, 4000);
+        animationIntervals.push(groupInterval);
+      }
+    };
+
+    startContinuousAnimation();
+
+    // Cleanup function
+    return () => {
+      animationIntervals.forEach(interval => clearInterval(interval));
+    };
+  }, [showAvatars]);
+
+  return (
+    <>
+      {/* Floating Header */}
+      <header 
+        style={{
+          position: 'fixed',
+          top: '20px',
+          left: '20px',
+          right: '20px',
+          zIndex: 50,
+          transition: 'all 0.3s ease',
+          backgroundColor: isScrolled ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.05)',
+          backdropFilter: 'blur(20px)',
+          borderRadius: '16px',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          padding: '12px 24px',
+          boxShadow: isScrolled ? '0 8px 32px rgba(0, 0, 0, 0.1)' : '0 4px 16px rgba(0, 0, 0, 0.05)',
+          height: 'auto',
+          overflow: 'hidden'
+        }}
+      >
+        <nav style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          width: '100%',
+          maxWidth: '1200px',
+          margin: '0 auto',
+          flexDirection: isClient && isMobileMenuOpen && windowWidth <= 768 ? 'column' : 'row',
+          gap: isClient && isMobileMenuOpen && windowWidth <= 768 ? '20px' : '0'
+        }}>
+          {/* Top row - Logo and Toggle */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            width: '100%'
+          }}>
+            {/* Left side - Logo */}
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <img
+                src={'/images/Collective logo v5 White (2).png'}
+                alt="Collective logo"
+                style={{
+                  height: '32px',
+                  width: 'auto',
+                  transition: 'all 0.3s ease'
+                }}
+              />
+            </div>
+            
+            {/* Desktop Navigation - Hidden on mobile */}
+            <div style={{ 
+              display: isClient && windowWidth <= 768 ? 'none' : 'flex', 
+              alignItems: 'center', 
+              gap: '32px'
+            }}>
+              <button style={{
+                background: 'none',
+                border: 'none',
+                color: 'white',
+                fontFamily: 'inherit',
+                fontSize: '14px',
+                fontWeight: '500',
+                cursor: 'pointer',
+                transition: 'opacity 0.2s ease',
+                opacity: 0.9
+              }}
+              onMouseEnter={(e) => (e.target as HTMLButtonElement).style.opacity = '1'}
+              onMouseLeave={(e) => (e.target as HTMLButtonElement).style.opacity = '0.9'}
+              >
+                Nonprofits
+              </button>
+              <button style={{
+                background: 'none',
+                border: 'none',
+                color: 'white',
+                fontFamily: 'inherit',
+                fontSize: '14px',
+                fontWeight: '500',
+                cursor: 'pointer',
+                transition: 'opacity 0.2s ease',
+                opacity: 0.9
+              }}
+              onMouseEnter={(e) => (e.target as HTMLButtonElement).style.opacity = '1'}
+              onMouseLeave={(e) => (e.target as HTMLButtonElement).style.opacity = '0.9'}
+              >
+                Community
+              </button>
+              <button style={{
+                background: 'none',
+                border: 'none',
+                color: 'white',
+                fontFamily: 'inherit',
+                fontSize: '14px',
+                fontWeight: '500',
+                cursor: 'pointer',
+                transition: 'opacity 0.2s ease',
+                opacity: 0.9
+              }}
+              onMouseEnter={(e) => (e.target as HTMLButtonElement).style.opacity = '1'}
+              onMouseLeave={(e) => (e.target as HTMLButtonElement).style.opacity = '0.9'}
+              >
+                Contact
+              </button>
+            </div>
+
+            {/* Mobile Menu Toggle - Only visible on mobile */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              style={{
+                display: isClient && windowWidth <= 768 ? 'flex' : 'none',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'none',
+                border: 'none',
+                color: 'white',
+                cursor: 'pointer',
+                padding: '8px',
+                borderRadius: '8px',
+                transition: 'all 0.2s ease',
+                opacity: 0.9
+              }}
+              onMouseEnter={(e) => (e.target as HTMLButtonElement).style.opacity = '1'}
+              onMouseLeave={(e) => (e.target as HTMLButtonElement).style.opacity = '0.9'}
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{
+                  transform: isMobileMenuOpen ? 'rotate(45deg)' : 'rotate(0deg)',
+                  transition: 'transform 0.3s ease'
+                }}
+              >
+                {isMobileMenuOpen ? (
+                  <>
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </>
+                ) : (
+                  <>
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                  </>
+                )}
+              </svg>
+            </button>
+          </div>
+
+          {/* Mobile Navigation Menu - Only visible when expanded */}
+          {isClient && isMobileMenuOpen && windowWidth <= 768 && (
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '16px',
+              width: '100%',
+              paddingTop: '8px',
+              animation: 'slideDown 0.3s ease-out'
+            }}>
+              <button style={{
+                background: 'none',
+                border: 'none',
+                color: 'white',
+                fontFamily: 'inherit',
+                fontSize: '16px',
+                fontWeight: '500',
+                cursor: 'pointer',
+                transition: 'opacity 0.2s ease',
+                opacity: 0.9,
+                padding: '8px 16px'
+              }}
+              onMouseEnter={(e) => (e.target as HTMLButtonElement).style.opacity = '1'}
+              onMouseLeave={(e) => (e.target as HTMLButtonElement).style.opacity = '0.9'}
+              onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Nonprofits
+              </button>
+              <button style={{
+                background: 'none',
+                border: 'none',
+                color: 'white',
+                fontFamily: 'inherit',
+                fontSize: '16px',
+                fontWeight: '500',
+                cursor: 'pointer',
+                transition: 'opacity 0.2s ease',
+                opacity: 0.9,
+                padding: '8px 16px'
+              }}
+              onMouseEnter={(e) => (e.target as HTMLButtonElement).style.opacity = '1'}
+              onMouseLeave={(e) => (e.target as HTMLButtonElement).style.opacity = '0.9'}
+              onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Community
+              </button>
+              <button style={{
+                background: 'none',
+                border: 'none',
+                color: 'white',
+                fontFamily: 'inherit',
+                fontSize: '16px',
+                fontWeight: '500',
+                cursor: 'pointer',
+                transition: 'opacity 0.2s ease',
+                opacity: 0.9,
+                padding: '8px 16px'
+              }}
+              onMouseEnter={(e) => (e.target as HTMLButtonElement).style.opacity = '1'}
+              onMouseLeave={(e) => (e.target as HTMLButtonElement).style.opacity = '0.9'}
+              onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Contact
+              </button>
+            </div>
+          )}
+        </nav>
+      </header>
+      
+      <style jsx global>{`
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+        
+        @font-face {
+          font-family: 'ABC Whyte';
+          src: url('/fonts/ABC Whyte/ABCWhyte-Bold-Trial.woff2') format('woff2'),
+               url('/fonts/ABC Whyte/ABCWhyte-Bold-Trial.woff') format('woff'),
+               url('/fonts/ABC Whyte/ABCWhyte-Bold-Trial.otf') format('opentype');
+          font-weight: 700;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'ABC Whyte';
+          src: url('/fonts/ABC Whyte/ABCWhyte-Regular-Trial.woff2') format('woff2'),
+               url('/fonts/ABC Whyte/ABCWhyte-Regular-Trial.woff') format('woff'),
+               url('/fonts/ABC Whyte/ABCWhyte-Regular-Trial.otf') format('opentype');
+          font-weight: 400;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'ABC Whyte';
+          src: url('/fonts/ABC Whyte/ABCWhyte-Light-Trial.woff2') format('woff2'),
+               url('/fonts/ABC Whyte/ABCWhyte-Light-Trial.woff') format('woff'),
+               url('/fonts/ABC Whyte/ABCWhyte-Light-Trial.otf') format('opentype');
+          font-weight: 300;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        body, html {
+          margin: 0;
+          padding: 0;
+          background-color: #0f766e;
+        }
+        
+        .arc-hero-title {
+          font-family: "ABC Whyte", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif !important;
+          font-size: 3rem !important;
+          font-weight: 300 !important;
+          line-height: 0.975em !important;
+          letter-spacing: -0.05em !important;
+          text-align: center !important;
+          max-width: 90vw !important;
+          color: white !important;
+        }
+        
+        @media screen and (min-width: 30em) {
+          .arc-hero-title {
+            font-size: 5rem !important;
+            line-height: 4.5rem !important;
+            max-width: 800px !important;
+          }
+        }
+        
+        @keyframes bounce {
+          0%, 100% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-10px);
+          }
+        }
+
+        @keyframes slideDown {
+          0% {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        /* Arc-style marquee animations */
+        .marquee-container {
+          width: 100%;
+          overflow: hidden;
+          position: relative;
+        }
+
+        .marquee {
+          display: flex;
+          width: max-content;
+          animation: marquee 67.74375s linear infinite;
+        }
+
+        .initial-child-container {
+          display: flex;
+          gap: 2rem;
+        }
+
+        .child {
+          flex-shrink: 0;
+          padding: 1rem 2rem;
+        }
+
+        .c-jvmdN {
+          color: #3139FB;
+          text-decoration: none;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+          font-weight: 600;
+          font-size: 14px;
+          white-space: nowrap;
+        }
+
+        .c-jvmdN:hover {
+          text-decoration: underline;
+        }
+
+        @keyframes marquee {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-100%);
+          }
+        }
+
+
+        
+        .glow-text {
+          text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 
+                       0 0 20px rgba(255, 255, 255, 0.6), 
+                       0 0 30px rgba(255, 255, 255, 0.4);
+        }
+        
+        /* Metallic border for special avatars */
+        .avatar-metallic-border {
+          position: relative;
+        }
+        
+        .avatar-metallic-border::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          border-radius: 24%;
+          background: linear-gradient(135deg, #ea580c 0%, #fb923c 50%, #ea580c 100%);
+          z-index: 1;
+          pointer-events: none;
+        }
+        
+        .avatar-metallic-border img {
+          position: relative;
+          z-index: 2;
+          width: calc(100% - 8px) !important;
+          height: calc(100% - 8px) !important;
+          margin: 4px;
+          border-radius: 20%;
+        }
+        
+
+        
+        /* Arc-style layout variables */
+        :root {
+          --max-width: 1400px;
+          --padding: 16px;
+          --hero-max-width: 1200px;
+          --hero-aspect: 3/2;
+          --hero-radius: 20px;
+          --hero-offset: -6%;
+        }
+        
+        /* Arc-like hero media positioning */
+        .hero-wrap {
+          width: 100%;
+          max-width: var(--hero-max-width);
+          margin: 0 auto;
+          padding: 0 var(--padding);
+        }
+
+        .hero-media {
+          position: relative;
+          width: 100%;
+          aspect-ratio: var(--hero-aspect);
+          overflow: hidden;
+          border-radius: var(--hero-radius);
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35), 0 8px 24px rgba(0, 0, 0, 0.25);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          background: rgba(0, 0, 0, 0.15);
+        }
+
+        .hero-media img {
+          width: 100%;
+          height: 100%;
+          display: block;
+          object-fit: cover;
+          object-position: 50% 35%;
+          transform: translateY(var(--hero-offset));
+          will-change: transform;
+        }
+
+        @media screen and (max-width: 767px) {
+          :root {
+            --hero-aspect: 16/10;
+            --hero-radius: 14px;
+            --hero-offset: -2%;
+          }
+          .hero-wrap {
+            padding: 0 12px;
+          }
+          /* Position hero content at 1/3 down on mobile */
+          .hero-content {
+            justify-content: flex-start !important;
+            padding-top: calc(33vh - 4rem) !important;
+            padding-bottom: 2rem !important;
+            min-height: 100vh !important;
+          }
+        }
+        
+
+      `}</style>
+      <main style={{ margin: 0, padding: 0 }}>
+
+      {/* Page 1 - Arc-inspired Hero Section */}
+      <section id="page-1" className="page-section" style={{
+        backgroundColor: '#0f766e',
+        backgroundImage: 'url(/noise-light.png)',
+        color: '#FFFADD',
+        overflow: 'hidden',
+        textAlign: 'center',
+        minHeight: '100vh',
+        display: 'flex',
+        justifyContent: 'center',
+        WebkitFontSmoothing: 'antialiased',
+        position: 'relative'
+      }}>
+
+        <div className="hero-content" style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1.5rem',
+          padding: '2rem 0 3rem 0',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '100%',
+          paddingTop: 0,
+          position: 'relative',
+          zIndex: 2
+        }}>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '2rem',
+            alignItems: 'center'
+          }}>
+            {/* Logo above tagline */}
+            <img
+              src={'/images/Collective logo v5 White (2).png'}
+              alt="Collective logo"
+              style={{
+                height: isClient && windowWidth <= 768 ? '48px' : '56px',
+                width: 'auto',
+                display: 'block',
+                filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.25))',
+                marginTop: isClient && windowWidth <= 768 ? '0px' : '-32px'
+              }}
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            <h1 className="arc-hero-title">
+              <span aria-hidden="true"></span>
+              Give <span className="glow-text">back</span> to your supporters
+              <span aria-hidden="true"></span>
+            </h1>
+            
+
+
+            {/* Download Buttons */}
+            <div className="download-buttons" style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1rem',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: '4rem'
+            }}>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <a href="#" className="download-btn download-btn-primary" style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  padding: '1rem 2rem',
+                  borderRadius: '0.75rem',
+                  fontWeight: '600',
+                  fontSize: '1.125rem',
+                  textDecoration: 'none',
+                  transition: 'all 0.2s ease',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.15), 0 0 20px rgba(255, 255, 255, 0.4), 0 0 40px rgba(255, 255, 255, 0.2)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                  color: '#0a5a52'
+                }}>
+                  Get early access
+                </a>
+                
+
+              </div>
+            </div>
+
+
+
+            {/* Hero media removed as requested */}
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+        {/* Clubhouse-style CSS transition avatars moved to page 1 */}
+        {showAvatars && avatars.map(avatar => {
+          let transition = 'none';
+          if (avatar.phase === 'bouncing') {
+            transition = `transform ${avatar.bounceDelay / 1000}s linear`;
+          } else if (avatar.phase === 'settling') {
+            transition = `transform ${avatar.destinationDelay / 1000}s ${getCubicBezier()}`;
+          } else if (avatar.phase === 'fading') {
+            transition = 'opacity 1s ease-out';
+          }
+
+          const hasMetallicBorder = shouldHaveMetallicBorder(avatar.id, avatar.groupIndex);
+
+          return (
+            <div
+              key={avatar.id}
+              className={hasMetallicBorder ? 'avatar-metallic-border' : ''}
+              style={{
+                position: 'absolute',
+                left: '0px',
+                top: '0px',
+                width: `${avatar.size}px`,
+                height: `${avatar.size}px`,
+                overflow: 'hidden',
+                borderRadius: '24%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: '#ddd',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                zIndex: 10,
+                transform: avatar.transform,
+                opacity: avatar.opacity,
+                transition,
+                willChange: 'transform, opacity',
+                pointerEvents: 'none'
+              }}
+            >
+              <img
+                src={avatarImages[avatar.id % avatarImages.length]}
+                alt="avatar"
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                loading="eager"
+                decoding="async"
+              />
+            </div>
+          );
+        })}
+      </section>
+
+      {/* Arc-style marquee section */}
+      <section id="wavy-section" className="wavy-section" style={{
+        backgroundColor: '#f7f3e9',
+        overflow: 'hidden',
+        minHeight: '80px',
+        display: 'flex',
+        alignItems: 'center',
+
+      }}>
+        <div className="marquee-container" style={{
+          width: '100%'
+        }}>
+          <div className="marquee" style={{
+            minWidth: '100%'
+          }}>
+            <div className="initial-child-container">
+              <div className="child" style={{ transform: 'none' }}>
+                <a href="https://www.fastcompany.com/90774866/four-radical-chrome-alternatives-to-reboot-your-web-browser" target="_blank" rel="noreferrer" tabIndex={-1} className="c-jvmdN">
+                  "Collective has transformed how I connect with my supporters" — Fast Company
+                </a>
+              </div>
+              <div className="child" style={{ transform: 'none' }}>
+                <a href="https://techcrunch.com" target="_blank" rel="noreferrer" tabIndex={-1} className="c-jvmdN">
+                  "Revolutionary community platform" — TechCrunch
+                </a>
+              </div>
+              <div className="child" style={{ transform: 'none' }}>
+                <a href="https://www.theverge.com" target="_blank" rel="noreferrer" tabIndex={-1} className="c-jvmdN">
+                  "The future of creator communities" — The Verge
+                </a>
+              </div>
+              <div className="child" style={{ transform: 'none' }}>
+                <a href="https://www.wired.com" target="_blank" rel="noreferrer" tabIndex={-1} className="c-jvmdN">
+                  "Beautiful, intuitive, powerful" — Wired
+                </a>
+              </div>
+              <div className="child" style={{ transform: 'none' }}>
+                <a href="https://www.bloomberg.com" target="_blank" rel="noreferrer" tabIndex={-1} className="c-jvmdN">
+                  "Game-changing community tools" — Bloomberg
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Page 2 - Second page with lighter complementary color */}
+      <section id="page-2" className="page-section" style={{
+        backgroundColor: '#f7f3e9', // Light cream color that complements the dark teal
+        backgroundImage: 'url(/noise-light.png)',
+        color: '#2d3748',
+        overflow: 'hidden',
+        textAlign: 'center',
+        minHeight: '100vh',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        WebkitFontSmoothing: 'antialiased',
+
+      }}>
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '2rem'
+        }}>
+          <h1 style={{
+            fontFamily: '"ABC Whyte", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif',
+            fontSize: '3rem',
+            fontWeight: '700',
+            lineHeight: '0.975em',
+            letterSpacing: '-0.05em',
+            textAlign: 'center',
+            maxWidth: '90vw',
+            marginBottom: '2rem',
+            color: '#2d3748'
+          }}>
+            Build Your Community
+          </h1>
+          <p style={{
+            fontSize: '1.25rem',
+            opacity: 0.8,
+            maxWidth: '600px',
+            lineHeight: '1.6'
+          }}>
+            Create meaningful connections and give back to your supporters with Collective's powerful community tools.
+          </p>
+        </div>
+
+        {/* Avatars moved to page 1 */}
+      </section>
+    </main>
+    </>
   );
 }
