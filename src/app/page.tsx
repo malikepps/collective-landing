@@ -23,11 +23,69 @@ import Image from "next/image";
     transform: string;
   }
 
+// Hero slide interface
+interface HeroSlide {
+  id: number;
+  title: string;
+  subtitle?: string;
+  backgroundImage: string;
+  backgroundVideo?: string;
+  overlayOpacity: number;
+  textPosition: 'center' | 'left' | 'right';
+}
+
 export default function Home() {
   const [showAvatars] = React.useState(true);
   const [avatars, setAvatars] = React.useState<Avatar[]>([]);
   const [isScrolled, setIsScrolled] = React.useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+  
+  // Hero slideshow state
+  const [currentSlide, setCurrentSlide] = React.useState(0);
+  const [isTransitioning, setIsTransitioning] = React.useState(false);
+  const [showPreviewBlob, setShowPreviewBlob] = React.useState(false);
+  const [isExpandingBlob, setIsExpandingBlob] = React.useState(false);
+  const [isAutoPlaying, setIsAutoPlaying] = React.useState(true);
+  const [slideTimer, setSlideTimer] = React.useState<NodeJS.Timeout | null>(null);
+  const [previewTimer, setPreviewTimer] = React.useState<NodeJS.Timeout | null>(null);
+  const [irisPosition, setIrisPosition] = React.useState({ x: 85, y: 50 });
+
+  // Hero slides data using splash folder assets
+  const heroSlides: HeroSlide[] = [
+    {
+      id: 1,
+      title: "Give back to your supporters",
+      subtitle: "Transform your community into a force for good",
+      backgroundImage: "/splash/05acb9d4-9bed-4785-8e77-af73c9d22e1b.jpg",
+      overlayOpacity: 0,
+      textPosition: 'center'
+    },
+    {
+      id: 2,
+      title: "Build meaningful connections",
+      subtitle: "Create lasting impact with your community",
+      backgroundImage: "/splash/1753149175358_d0770dae-1906-4591-a031-45f2b01c0062.webp",
+      backgroundVideo: "/splash/1753043057334_b8a29dab-bc3b-4e4d-93fd-b31ccfe152ab.mp4",
+      overlayOpacity: 0,
+      textPosition: 'center'
+    },
+    {
+      id: 3,
+      title: "Empower your supporters",
+      subtitle: "Turn passion into positive change",
+      backgroundImage: "/splash/1754509929485_188f11af-22ed-4502-8a41-58edb07946b1.webp",
+      overlayOpacity: 0,
+      textPosition: 'center'
+    },
+    {
+      id: 4,
+      title: "Make every contribution count",
+      subtitle: "Revolutionary community platform",
+      backgroundImage: "/splash/05acb9d4-9bed-4785-8e77-af73c9d22e1b.jpg",
+      overlayOpacity: 0,
+      textPosition: 'center'
+    }
+  ];
 
   // Helper functions for animation
   const randomBetween = (min: number, max: number) => Math.random() * (max - min) + min;
@@ -71,6 +129,67 @@ export default function Home() {
   const [windowWidth, setWindowWidth] = React.useState(1024);
   const [isClient, setIsClient] = React.useState(false);
 
+  // Generate random iris position for cinematic effect
+  const generateRandomIrisPosition = () => {
+    // Keep it within reasonable bounds for good visual effect
+    const x = Math.random() * 60 + 20; // 20% to 80% from left
+    const y = Math.random() * 60 + 20; // 20% to 80% from top
+    return { x, y };
+  };
+
+  // Slideshow navigation functions
+  const nextSlide = () => {
+    if (isTransitioning) return;
+    const newPosition = generateRandomIrisPosition();
+    setIrisPosition(newPosition);
+    // Keep same slide, just change background
+    setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+    resetSlideTimers();
+  };
+
+  const prevSlide = () => {
+    if (isTransitioning) return;
+    const newPosition = generateRandomIrisPosition();
+    setIrisPosition(newPosition);
+    // Keep same slide, just change background
+    setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
+    resetSlideTimers();
+  };
+
+  const resetSlideTimers = () => {
+    if (slideTimer) clearTimeout(slideTimer);
+    if (previewTimer) clearTimeout(previewTimer);
+    setShowPreviewBlob(false);
+    setIsExpandingBlob(false);
+    
+    if (isAutoPlaying) {
+      // Show preview blob at 4 seconds
+      const newPreviewTimer = setTimeout(() => {
+        // Set iris position when showing preview
+        const newPosition = generateRandomIrisPosition();
+        setIrisPosition(newPosition);
+        setShowPreviewBlob(true);
+      }, 4000);
+      setPreviewTimer(newPreviewTimer);
+      
+      // Auto advance at 6.5 seconds (with iris expansion)
+      const newSlideTimer = setTimeout(() => {
+        // Start iris expansion after a brief moment to let users see the preview
+        setTimeout(() => {
+          setIsExpandingBlob(true);
+          
+          // Change slide after expansion completes
+          setTimeout(() => {
+            setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+            setIsExpandingBlob(false);
+            setShowPreviewBlob(false);
+          }, 2200); // Match expansion animation duration (2.2s)
+        }, 800); // Longer pause to appreciate the iris preview
+      }, 6500);
+      setSlideTimer(newSlideTimer);
+    }
+  };
+
   // Client-side initialization and event listeners
   React.useEffect(() => {
     // Set client-side flag and initial window width
@@ -98,6 +217,22 @@ export default function Home() {
       window.removeEventListener('resize', handleResize);
     };
   }, []);
+
+  // Initialize slideshow timers
+  React.useEffect(() => {
+    resetSlideTimers();
+    
+    return () => {
+      if (slideTimer) clearTimeout(slideTimer);
+      if (previewTimer) clearTimeout(previewTimer);
+    };
+  }, [currentSlide, isAutoPlaying]);
+
+  // Pause auto-play temporarily when user interacts
+  const pauseAutoPlay = () => {
+    setIsAutoPlaying(false);
+    setTimeout(() => setIsAutoPlaying(true), 10000); // Resume after 10 seconds
+  };
 
   // Continuous overlapping avatar animation waves
   React.useEffect(() => {
@@ -496,6 +631,24 @@ export default function Home() {
               >
                 Contact
               </button>
+              
+              {/* Get Early Access Button */}
+              <a href="#" style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.75rem',
+                padding: '0.75rem 1.5rem',
+                borderRadius: '0.5rem',
+                fontWeight: '600',
+                fontSize: '14px',
+                textDecoration: 'none',
+                transition: 'all 0.2s ease',
+                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                color: '#0a5a52',
+                cursor: 'pointer'
+              }}>
+                Get early access
+              </a>
             </div>
 
             {/* Mobile Menu Toggle - Only visible on mobile */}
@@ -611,6 +764,27 @@ export default function Home() {
               >
                 Contact
               </button>
+              
+              {/* Mobile Get Early Access Button */}
+              <a href="#" style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.75rem',
+                padding: '0.75rem 1.5rem',
+                borderRadius: '0.5rem',
+                fontWeight: '600',
+                fontSize: '16px',
+                textDecoration: 'none',
+                transition: 'all 0.2s ease',
+                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                color: '#0a5a52',
+                cursor: 'pointer',
+                marginTop: '8px'
+              }}
+              onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Get early access
+              </a>
             </div>
           )}
         </nav>
@@ -790,34 +964,108 @@ export default function Home() {
           --hero-offset: -6%;
         }
         
-        /* Arc-like hero media positioning */
-        .hero-wrap {
-          width: 100%;
-          max-width: var(--hero-max-width);
-          margin: 0 auto;
-          padding: 0 var(--padding);
-        }
-
-        .hero-media {
-          position: relative;
-          width: 100%;
-          aspect-ratio: var(--hero-aspect);
-          overflow: hidden;
-          border-radius: var(--hero-radius);
-          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35), 0 8px 24px rgba(0, 0, 0, 0.25);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          background: rgba(0, 0, 0, 0.15);
-        }
-
-        .hero-media img {
+        /* Hero slideshow styles */
+        .hero-background {
+          position: absolute;
+          top: 0;
+          left: 0;
           width: 100%;
           height: 100%;
-          display: block;
-          object-fit: cover;
-          object-position: 50% 35%;
-          transform: translateY(var(--hero-offset));
-          will-change: transform;
+          z-index: 1;
         }
+
+        .hero-slide {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          opacity: 0;
+          transition: opacity 0.8s ease-in-out;
+        }
+
+        .hero-slide.active {
+          opacity: 1;
+        }
+
+        .hero-slide img,
+        .hero-slide video {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center;
+        }
+
+        .hero-slide video {
+          pointer-events: none;
+        }
+
+        /* Iris/Aperture transition styles */
+        .current-slide {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          z-index: 10;
+        }
+
+        .next-slide {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          z-index: 15;
+          clip-path: circle(0px at var(--iris-x, 50%) var(--iris-y, 50%));
+          transition: none;
+        }
+
+        .next-slide.preview {
+          clip-path: circle(120px at var(--iris-x, 50%) var(--iris-y, 50%));
+          transition: clip-path 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .next-slide.expanding {
+          clip-path: circle(200% at var(--iris-x, 50%) var(--iris-y, 50%));
+          transition: clip-path 2.2s cubic-bezier(0.22, 0.61, 0.36, 1);
+        }
+
+
+        /* Navigation arrows */
+        .nav-arrow {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 50px;
+          height: 50px;
+          background: rgba(255, 255, 255, 0.1);
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          z-index: 30;
+          transition: all 0.3s ease;
+          color: white;
+        }
+
+        .nav-arrow:hover {
+          background: rgba(255, 255, 255, 0.2);
+          transform: translateY(-50%) scale(1.1);
+        }
+
+        .nav-arrow.left {
+          left: 30px;
+        }
+
+        .nav-arrow.right {
+          right: 30px;
+        }
+
+
 
         @media screen and (max-width: 767px) {
           :root {
@@ -841,10 +1089,8 @@ export default function Home() {
       `}</style>
       <main style={{ margin: 0, padding: 0 }}>
 
-      {/* Page 1 - Arc-inspired Hero Section */}
+      {/* Page 1 - Hero Section with Rotating Background */}
       <section id="page-1" className="page-section" style={{
-        backgroundColor: '#0f766e',
-        backgroundImage: 'url(/noise-light.png)',
         color: '#FFFADD',
         overflow: 'hidden',
         textAlign: 'center',
@@ -854,132 +1100,211 @@ export default function Home() {
         WebkitFontSmoothing: 'antialiased',
         position: 'relative'
       }}>
+        {/* Hero Background Slideshow */}
+        <div className="hero-background">
+          {/* Next slide positioned behind (shows through iris) */}
+          <div 
+            className={`next-slide ${showPreviewBlob ? 'preview' : ''} ${isExpandingBlob ? 'expanding' : ''}`}
+            style={{
+              '--iris-x': `${irisPosition.x}%`,
+              '--iris-y': `${irisPosition.y}%`
+            } as React.CSSProperties}
+          >
+            {heroSlides[(currentSlide + 1) % heroSlides.length]?.backgroundVideo ? (
+              <video
+                key={`next-${(currentSlide + 1) % heroSlides.length}`}
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="metadata"
+                style={{ 
+                  width: '100%', 
+                  height: '100%', 
+                  objectFit: 'cover' 
+                }}
+              >
+                <source src={heroSlides[(currentSlide + 1) % heroSlides.length].backgroundVideo} type="video/mp4" />
+                <img 
+                  src={heroSlides[(currentSlide + 1) % heroSlides.length].backgroundImage} 
+                  alt=""
+                  style={{ 
+                    width: '100%', 
+                    height: '100%', 
+                    objectFit: 'cover' 
+                  }}
+                />
+              </video>
+            ) : (
+              <img 
+                key={`next-img-${(currentSlide + 1) % heroSlides.length}`}
+                src={heroSlides[(currentSlide + 1) % heroSlides.length]?.backgroundImage} 
+                alt=""
+                style={{ 
+                  width: '100%', 
+                  height: '100%', 
+                  objectFit: 'cover' 
+                }}
+              />
+            )}
+          </div>
 
-        <div className="hero-content" style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '1.5rem',
-          padding: '2rem 0 3rem 0',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: '100%',
-          paddingTop: 0,
-          position: 'relative',
-          zIndex: 2
-        }}>
+          {/* Current slide */}
+          <div className="current-slide">
+            {heroSlides[currentSlide]?.backgroundVideo ? (
+              <video
+                key={`current-${currentSlide}`}
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="metadata"
+                style={{ 
+                  width: '100%', 
+                  height: '100%', 
+                  objectFit: 'cover' 
+                }}
+              >
+                <source src={heroSlides[currentSlide].backgroundVideo} type="video/mp4" />
+                <img 
+                  src={heroSlides[currentSlide].backgroundImage} 
+                  alt=""
+                  style={{ 
+                    width: '100%', 
+                    height: '100%', 
+                    objectFit: 'cover' 
+                  }}
+                />
+              </video>
+            ) : (
+              <img 
+                key={`current-img-${currentSlide}`}
+                src={heroSlides[currentSlide]?.backgroundImage} 
+                alt=""
+                style={{ 
+                  width: '100%', 
+                  height: '100%', 
+                  objectFit: 'cover' 
+                }}
+              />
+            )}
+          </div>
+            
+        </div>
+          
+          {/* Grain overlay */}
           <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundImage: 'url(/noise-light.png)',
+            opacity: 0.4,
+            mixBlendMode: 'overlay',
+            pointerEvents: 'none',
+            zIndex: 4
+          }} />
+          
+          {/* Dark overlay for better text readability */}
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            background: `rgba(0, 0, 0, 0)`,
+            zIndex: 20,
+            pointerEvents: 'none'
+          }} />
+
+          {/* Navigation Arrows */}
+          <button 
+          className="nav-arrow left"
+          onClick={() => {
+            prevSlide();
+            pauseAutoPlay();
+          }}
+          aria-label="Previous slide"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <polyline points="15,18 9,12 15,6"></polyline>
+          </svg>
+          </button>
+          
+          <button 
+            className="nav-arrow right"
+            onClick={() => {
+              nextSlide();
+              pauseAutoPlay();
+            }}
+            aria-label="Next slide"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <polyline points="9,18 15,12 9,6"></polyline>
+            </svg>
+          </button>
+
+
+          <div className="hero-content" style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: '2rem',
-            alignItems: 'center'
+            gap: '1.5rem',
+            padding: '2rem 4rem 4rem 4rem',
+            alignItems: 'flex-start',
+            justifyContent: 'flex-end',
+            minHeight: '100vh',
+            paddingTop: 0,
+            position: 'relative',
+            zIndex: 2
           }}>
-            {/* Logo above tagline */}
-            <Image
-              src="/images/Collective logo v5 White (2).png"
-              alt="Collective logo"
-              width={200}
-              height={56}
-              style={{
-                height: isClient && windowWidth <= 768 ? '48px' : '56px',
-                width: 'auto',
-                display: 'block',
-                filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.25))',
-                marginTop: isClient && windowWidth <= 768 ? '0px' : '-32px'
-              }}
-            />
-            <h1 className="arc-hero-title">
-              <span aria-hidden="true"></span>
-              Give <span className="glow-text">back</span> to your supporters
-              <span aria-hidden="true"></span>
-            </h1>
-            
-
-
-            {/* Download Buttons */}
-            <div className="download-buttons" style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '1rem',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: '4rem'
+          {/* FORCE Give back to TOP LEFT corner */}
+          <div style={{
+            position: 'fixed',
+            top: isClient && windowWidth <= 768 ? 'auto' : '120px',
+            bottom: isClient && windowWidth <= 768 ? '200px' : 'auto',
+            left: isClient && windowWidth <= 768 ? '20px' : '40px',
+            zIndex: 100
+          }}>
+            <h1 style={{
+              fontFamily: '"ABC Whyte", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif',
+              fontSize: 'clamp(4.5rem, 11vw, 12rem)',
+              fontWeight: '300',
+              lineHeight: '0.8',
+              letterSpacing: '-0.03em',
+              color: 'white',
+              margin: 0,
+              whiteSpace: 'nowrap',
+              textAlign: 'left'
             }}>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <a href="#" className="download-btn download-btn-primary" style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.75rem',
-                  padding: '1rem 2rem',
-                  borderRadius: '0.75rem',
-                  fontWeight: '600',
-                  fontSize: '1.125rem',
-                  textDecoration: 'none',
-                  transition: 'all 0.2s ease',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.15), 0 0 20px rgba(255, 255, 255, 0.4), 0 0 40px rgba(255, 255, 255, 0.2)',
-                  backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                  color: '#0a5a52'
-                }}>
-                  Get early access
-                </a>
-                
+              Give <span style={{
+                textShadow: '0 0 30px rgba(255, 255, 255, 0.8), 0 0 60px rgba(255, 255, 255, 0.6), 0 0 90px rgba(255, 255, 255, 0.4)'
+              }}>back</span>
+            </h1>
+          </div>
 
-              </div>
-            </div>
-
-
-
-            {/* Hero media removed as requested */}
+          {/* FORCE to your supporters to BOTTOM RIGHT corner */}
+          <div style={{
+            position: 'fixed',
+            bottom: isClient && windowWidth <= 768 ? '60px' : '80px',
+            right: isClient && windowWidth <= 768 ? '20px' : '40px',
+            zIndex: 100
+          }}>
+            <h1 style={{
+              fontFamily: '"ABC Whyte", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif',
+              fontSize: 'clamp(4.5rem, 11vw, 12rem)',
+              fontWeight: '300',
+              lineHeight: '0.8',
+              letterSpacing: '-0.03em',
+              color: 'white',
+              margin: 0,
+              textAlign: 'right'
+            }}>
+              to your<br />supporters
+            </h1>
           </div>
         </div>
-        {/* Clubhouse-style CSS transition avatars moved to page 1 */}
-        {showAvatars && avatars.map(avatar => {
-          let transition = 'none';
-          if (avatar.phase === 'bouncing') {
-            transition = `transform ${avatar.bounceDelay / 1000}s linear`;
-          } else if (avatar.phase === 'settling') {
-            transition = `transform ${avatar.destinationDelay / 1000}s ${getCubicBezier()}`;
-          } else if (avatar.phase === 'fading') {
-            transition = 'opacity 1s ease-out';
-          }
 
-          const hasMetallicBorder = shouldHaveMetallicBorder(avatar.id, avatar.groupIndex);
-
-          return (
-            <div
-              key={avatar.id}
-              className={hasMetallicBorder ? 'avatar-metallic-border' : ''}
-              style={{
-                position: 'absolute',
-                left: '0px',
-                top: '0px',
-                width: `${avatar.size}px`,
-                height: `${avatar.size}px`,
-                overflow: 'hidden',
-                borderRadius: '24%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: '#ddd',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-                zIndex: 10,
-                transform: avatar.transform,
-                opacity: avatar.opacity,
-                transition,
-                willChange: 'transform, opacity',
-                pointerEvents: 'none'
-              }}
-            >
-              <Image
-                src={avatarImages[avatar.id % avatarImages.length]}
-                alt="avatar"
-                fill
-                style={{ objectFit: 'cover' }}
-                loading="eager"
-                unoptimized
-              />
-            </div>
-          );
-        })}
       </section>
 
       {/* Arc-style marquee section */}
@@ -1028,11 +1353,11 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Page 2 - Second page with lighter complementary color */}
+      {/* Page 2 - Build Your Community with Avatar Animation */}
       <section id="page-2" className="page-section" style={{
-        backgroundColor: '#f7f3e9', // Light cream color that complements the dark teal
+        backgroundColor: '#0f766e',
         backgroundImage: 'url(/noise-light.png)',
-        color: '#2d3748',
+        color: '#FFFADD',
         overflow: 'hidden',
         textAlign: 'center',
         minHeight: '100vh',
@@ -1040,7 +1365,7 @@ export default function Home() {
         justifyContent: 'center',
         alignItems: 'center',
         WebkitFontSmoothing: 'antialiased',
-
+        position: 'relative'
       }}>
         <div style={{
           display: 'flex',
@@ -1058,7 +1383,7 @@ export default function Home() {
             textAlign: 'center',
             maxWidth: '90vw',
             marginBottom: '2rem',
-            color: '#2d3748'
+            color: '#FFFADD'
           }}>
             Build Your Community
           </h1>
@@ -1072,7 +1397,55 @@ export default function Home() {
           </p>
         </div>
 
-        {/* Avatars moved to page 1 */}
+        {/* Clubhouse-style Avatar Animation */}
+        {showAvatars && avatars.map(avatar => {
+          let transition = 'none';
+          if (avatar.phase === 'bouncing') {
+            transition = `transform ${avatar.bounceDelay / 1000}s linear`;
+          } else if (avatar.phase === 'settling') {
+            transition = `transform ${avatar.destinationDelay / 1000}s ${getCubicBezier()}`;
+          } else if (avatar.phase === 'fading') {
+            transition = 'opacity 1s ease-out';
+          }
+
+          const hasMetallicBorder = shouldHaveMetallicBorder(avatar.id, avatar.groupIndex);
+
+          return (
+            <div
+              key={avatar.id}
+              className={hasMetallicBorder ? 'avatar-metallic-border' : ''}
+              style={{
+                position: 'absolute',
+                left: '0px',
+                top: '0px',
+                width: `${avatar.size}px`,
+                height: `${avatar.size}px`,
+                overflow: 'hidden',
+                borderRadius: '24%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: '#ddd',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                zIndex: 10,
+                transform: avatar.transform,
+                opacity: avatar.opacity,
+                transition,
+                willChange: 'transform, opacity',
+                pointerEvents: 'none'
+              }}
+            >
+              <Image
+                src={avatarImages[avatar.id % avatarImages.length]}
+                alt="avatar"
+                fill
+                style={{ objectFit: 'cover' }}
+                loading="eager"
+                unoptimized
+              />
+            </div>
+          );
+        })}
       </section>
     </main>
     </>
