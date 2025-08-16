@@ -207,7 +207,9 @@ export default function HomeV2() {
     };
 
     let animationFrameId: number | null = null;
+    // eslint-disable-next-line prefer-const
     let targetPosition = { x: 50, y: 50 };
+    // eslint-disable-next-line prefer-const
     let currentPosition = { x: 50, y: 50 };
 
     const handleMouseMove = (e: MouseEvent) => {
