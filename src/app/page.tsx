@@ -42,7 +42,6 @@ export default function Home() {
   
   // Hero slideshow state
   const [currentSlide, setCurrentSlide] = React.useState(0);
-  const [isTransitioning, setIsTransitioning] = React.useState(false);
   const [showPreviewBlob, setShowPreviewBlob] = React.useState(false);
   const [isExpandingBlob, setIsExpandingBlob] = React.useState(false);
   const [isAutoPlaying, setIsAutoPlaying] = React.useState(true);
@@ -1258,9 +1257,9 @@ export default function Home() {
             position: 'relative',
             zIndex: 2
           }}>
-          {/* FORCE Give back to TOP LEFT corner */}
+          {/* Give back to TOP LEFT corner - positioned relative to hero section */}
           <div style={{
-            position: 'fixed',
+            position: 'absolute',
             top: isClient && windowWidth <= 768 ? 'auto' : '120px',
             bottom: isClient && windowWidth <= 768 ? '200px' : 'auto',
             left: isClient && windowWidth <= 768 ? '20px' : '40px',
@@ -1283,9 +1282,9 @@ export default function Home() {
             </h1>
           </div>
 
-          {/* FORCE to your supporters to BOTTOM RIGHT corner */}
+          {/* to your supporters to BOTTOM RIGHT corner - positioned relative to hero section */}
           <div style={{
-            position: 'fixed',
+            position: 'absolute',
             bottom: isClient && windowWidth <= 768 ? '60px' : '80px',
             right: isClient && windowWidth <= 768 ? '20px' : '40px',
             zIndex: 100
@@ -1300,7 +1299,7 @@ export default function Home() {
               margin: 0,
               textAlign: 'right'
             }}>
-              to your<br />supporters
+              To your<br />community
             </h1>
           </div>
         </div>
@@ -1349,6 +1348,198 @@ export default function Home() {
                 </a>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Benefits Section - Collective is for... */}
+      <section className="benefits-section" style={{
+        position: 'relative',
+        backgroundColor: '#f7f3e9', // Same as horizontal banner
+        backgroundImage: 'url(/noise-light.png)',
+        backgroundSize: '100px 100px',
+        backgroundRepeat: 'repeat',
+        minHeight: '300vh', // 3 full viewport heights for 3 benefits
+        scrollSnapType: 'y mandatory',
+        overflowY: 'scroll'
+      }}>
+        {/* Benefit 1: Storytelling */}
+        <div style={{
+          height: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '2rem',
+          textAlign: 'center',
+          scrollSnapAlign: 'start',
+          scrollSnapStop: 'always'
+        }}>
+          <div style={{
+            maxWidth: '900px',
+            marginBottom: '2rem'
+          }}>
+            <h2 style={{
+              fontFamily: '"ABC Whyte", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif',
+              fontSize: 'clamp(2rem, 4vw, 3.5rem)',
+              fontWeight: '500',
+              lineHeight: '1.1',
+              letterSpacing: '-0.02em',
+              color: '#2d3748',
+              margin: 0,
+              marginBottom: '1rem'
+            }}>
+              Collective is for<br />Storytelling
+            </h2>
+            <p style={{
+              fontFamily: '"ABC Whyte", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif',
+              fontSize: 'clamp(1rem, 2vw, 1.25rem)',
+              fontWeight: '300',
+              color: '#4a5568',
+              margin: 0,
+              lineHeight: '1.5'
+            }}>
+              Share your journey and connect with your audience through powerful storytelling tools
+            </p>
+          </div>
+          
+          {/* Video placeholder with squircle corners */}
+          <div style={{
+            width: '90%',
+            maxWidth: '1100px',
+            aspectRatio: '16/9',
+            backgroundColor: '#e2e8f0',
+            borderRadius: '3rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '1.5rem',
+            color: '#64748b',
+            fontFamily: '"ABC Whyte", sans-serif',
+            fontWeight: '500',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.1)'
+          }}>
+            Video Placeholder - Storytelling Demo
+          </div>
+        </div>
+
+        {/* Benefit 2: Connection */}
+        <div style={{
+          height: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '2rem',
+          textAlign: 'center',
+          scrollSnapAlign: 'start',
+          scrollSnapStop: 'always'
+        }}>
+          <div style={{
+            maxWidth: '900px',
+            marginBottom: '2rem'
+          }}>
+            <h2 style={{
+              fontFamily: '"ABC Whyte", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif',
+              fontSize: 'clamp(2rem, 4vw, 3.5rem)',
+              fontWeight: '500',
+              lineHeight: '1.1',
+              letterSpacing: '-0.02em',
+              color: '#2d3748',
+              margin: 0,
+              marginBottom: '1rem'
+            }}>
+              Collective is for<br />Connection
+            </h2>
+            <p style={{
+              fontFamily: '"ABC Whyte", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif',
+              fontSize: 'clamp(1rem, 2vw, 1.25rem)',
+              fontWeight: '300',
+              color: '#4a5568',
+              margin: 0,
+              lineHeight: '1.5'
+            }}>
+              Build meaningful relationships and foster genuine community engagement
+            </p>
+          </div>
+          
+          {/* Video placeholder with squircle corners */}
+          <div style={{
+            width: '90%',
+            maxWidth: '1100px',
+            aspectRatio: '16/9',
+            backgroundColor: '#e2e8f0',
+            borderRadius: '3rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '1.5rem',
+            color: '#64748b',
+            fontFamily: '"ABC Whyte", sans-serif',
+            fontWeight: '500',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.1)'
+          }}>
+            Video Placeholder - Connection Demo
+          </div>
+        </div>
+
+        {/* Benefit 3: Growth */}
+        <div style={{
+          height: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '2rem',
+          textAlign: 'center',
+          scrollSnapAlign: 'start',
+          scrollSnapStop: 'always'
+        }}>
+          <div style={{
+            maxWidth: '900px',
+            marginBottom: '2rem'
+          }}>
+            <h2 style={{
+              fontFamily: '"ABC Whyte", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif',
+              fontSize: 'clamp(2rem, 4vw, 3.5rem)',
+              fontWeight: '500',
+              lineHeight: '1.1',
+              letterSpacing: '-0.02em',
+              color: '#2d3748',
+              margin: 0,
+              marginBottom: '1rem'
+            }}>
+              Collective is for<br />Growth
+            </h2>
+            <p style={{
+              fontFamily: '"ABC Whyte", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif',
+              fontSize: 'clamp(1rem, 2vw, 1.25rem)',
+              fontWeight: '300',
+              color: '#4a5568',
+              margin: 0,
+              lineHeight: '1.5'
+            }}>
+              Scale your impact and grow your community with data-driven insights
+            </p>
+          </div>
+          
+          {/* Video placeholder with squircle corners */}
+          <div style={{
+            width: '90%',
+            maxWidth: '1100px',
+            aspectRatio: '16/9',
+            backgroundColor: '#e2e8f0',
+            borderRadius: '3rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '1.5rem',
+            color: '#64748b',
+            fontFamily: '"ABC Whyte", sans-serif',
+            fontWeight: '500',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.1)'
+          }}>
+            Video Placeholder - Growth Demo
           </div>
         </div>
       </section>

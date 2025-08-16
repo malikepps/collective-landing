@@ -42,7 +42,6 @@ export default function HomeV2() {
   
   // Hero slideshow state
   const [currentSlide, setCurrentSlide] = React.useState(0);
-  const [isTransitioning, setIsTransitioning] = React.useState(false);
   const [showPreviewBlob, setShowPreviewBlob] = React.useState(false);
   const [isExpandingBlob, setIsExpandingBlob] = React.useState(false);
   const [isAutoPlaying, setIsAutoPlaying] = React.useState(true);
