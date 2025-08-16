@@ -138,7 +138,6 @@ export default function Home() {
 
   // Slideshow navigation functions
   const nextSlide = () => {
-    if (isTransitioning) return;
     const newPosition = generateRandomIrisPosition();
     setIrisPosition(newPosition);
     // Keep same slide, just change background
@@ -147,7 +146,6 @@ export default function Home() {
   };
 
   const prevSlide = () => {
-    if (isTransitioning) return;
     const newPosition = generateRandomIrisPosition();
     setIrisPosition(newPosition);
     // Keep same slide, just change background
