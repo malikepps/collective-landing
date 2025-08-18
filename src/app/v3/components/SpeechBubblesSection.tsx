@@ -121,7 +121,7 @@ export default function SpeechBubblesSection({ className = "" }: SpeechBubblesSe
         <div className="speech-bubble-second">
           <div className="second-speech-bubble">
             <p className="speech-text">
-              We had a hunch that mission-driven organizations deserved the same opportunity. So we spoke to a lot of people to better understand what's holding nonprofits back from achieving better engagement and growth...
+              We had a hunch that mission-driven organizations deserved the same opportunity. So we spoke to a lot of people to better understand what&apos;s holding nonprofits back from achieving better engagement and growth...
             </p>
           </div>
         </div>

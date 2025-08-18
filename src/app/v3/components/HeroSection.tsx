@@ -21,7 +21,7 @@ export default function HeroSection({ slides }: HeroSectionProps) {
   const [currentSlide, setCurrentSlide] = React.useState(0);
   const [showPreviewBlob, setShowPreviewBlob] = React.useState(false);
   const [isExpandingBlob, setIsExpandingBlob] = React.useState(false);
-  const [isAutoPlaying, setIsAutoPlaying] = React.useState(true);
+  const [isAutoPlaying] = React.useState(true);
   const [slideTimer, setSlideTimer] = React.useState<NodeJS.Timeout | null>(null);
   const [previewTimer, setPreviewTimer] = React.useState<NodeJS.Timeout | null>(null);
   const [irisPosition, setIrisPosition] = React.useState({ x: 85, y: 50 });

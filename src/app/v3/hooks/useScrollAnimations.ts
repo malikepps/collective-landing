@@ -11,7 +11,7 @@ interface ScrollAnimationOptions {
 export const useScrollAnimations = ({
   onScroll,
   smoothScrolling = true,
-  easing = 'cubic-bezier(0.56, 0.86, 0.59, 1)'
+  easing = 'cubic-bezier(0.56, 0.86, 0.59, 1)' // eslint-disable-line @typescript-eslint/no-unused-vars
 }: ScrollAnimationOptions = {}) => {
   
   const handleScroll = useCallback(() => {

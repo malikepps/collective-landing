@@ -1,28 +1,28 @@
 "use client";
 
 import React from "react";
-import HeroSection from "./components/HeroSection";
-import NarrativeSection from "./components/NarrativeSection";
+// import HeroSection from "./components/HeroSection";
+// import NarrativeSection from "./components/NarrativeSection";
 import SpeechBubblesSection from "./components/SpeechBubblesSection";
 import ScatteredBubblesSection from "./components/ScatteredBubblesSection";
 import PresentSection from "./components/PresentSection";
 import TornPaperTransition from "./components/TornPaperTransition";
 import { useScrollAnimations } from "./hooks/useScrollAnimations";
 
-// Hero slide interface
-interface HeroSlide {
-  id: number;
-  title: string;
-  subtitle?: string;
-  backgroundImage: string;
-  backgroundVideo?: string;
-  overlayOpacity: number;
-  textPosition: 'center' | 'left' | 'right';
-}
+// Hero slide interface (for future use)
+// interface HeroSlide {
+//   id: number;
+//   title: string;
+//   subtitle?: string;
+//   backgroundImage: string;
+//   backgroundVideo?: string;
+//   overlayOpacity: number;
+//   textPosition: 'center' | 'left' | 'right';
+// }
 
 export default function HomeV3() {
-  // Initialize scroll animations
-  const { scrollToElement } = useScrollAnimations({
+  // Initialize scroll animations (for future use)
+  useScrollAnimations({
     smoothScrolling: true
   });
 
