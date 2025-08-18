@@ -38,7 +38,6 @@ export default function HomeV2() {
   const [avatars, setAvatars] = React.useState<Avatar[]>([]);
   const [isScrolled, setIsScrolled] = React.useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
-  const [mousePosition, setMousePosition] = React.useState({ x: 50, y: 50 });
   
   // Hero slideshow state
   const [currentSlide, setCurrentSlide] = React.useState(0);
@@ -204,43 +203,13 @@ export default function HomeV2() {
       }
     };
 
-    let animationFrameId: number | null = null;
-    // eslint-disable-next-line prefer-const
-    let targetPosition = { x: 50, y: 50 };
-    // eslint-disable-next-line prefer-const
-    let currentPosition = { x: 50, y: 50 };
-
-    const handleMouseMove = (e: MouseEvent) => {
-      // Calculate target mouse position as percentage
-      targetPosition.x = (e.clientX / window.innerWidth) * 100;
-      targetPosition.y = (e.clientY / window.innerHeight) * 100;
-    };
-
-    // Smooth animation loop for fluid movement
-    const animateGradient = () => {
-      // Lerp (linear interpolation) for smooth following
-      const lerpFactor = 0.04; // Very smooth liquid-like movement
-      currentPosition.x += (targetPosition.x - currentPosition.x) * lerpFactor;
-      currentPosition.y += (targetPosition.y - currentPosition.y) * lerpFactor;
-      
-      setMousePosition({ x: currentPosition.x, y: currentPosition.y });
-      animationFrameId = requestAnimationFrame(animateGradient);
-    };
-
-    // Start animation loop
-    animationFrameId = requestAnimationFrame(animateGradient);
 
     window.addEventListener('scroll', handleScroll);
     window.addEventListener('resize', handleResize);
-    window.addEventListener('mousemove', handleMouseMove);
     
     return () => {
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', handleResize);
-      window.removeEventListener('mousemove', handleMouseMove);
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-      }
     };
   }, []);
 
@@ -551,14 +520,8 @@ export default function HomeV2() {
 
   return (
     <>
-      {/* Patreon-style gradient background */}
-      <div 
-        className="gradient-background" 
-        style={{
-          '--mouse-x': mousePosition.x - 50, // Centered at 50%
-          '--mouse-y': mousePosition.y - 50  // Centered at 50%
-        } as React.CSSProperties}
-      />
+      {/* Grain effect background */}
+      <div className="grain-background" />
       
       {/* Header on Top of Hero */}
       <header 
@@ -864,13 +827,13 @@ export default function HomeV2() {
         body, html {
           margin: 0;
           padding: 0;
-          background: #0f766e; /* Exact color from original page "Build your community" section */
+          background: #CBD8CB; /* Sophisticated sage green base */
           position: relative;
           overflow-x: hidden;
         }
         
-        /* Liquid-like moving gradient background */
-        .gradient-background {
+        /* Simple grain effect background */
+        .grain-background {
           position: fixed;
           top: 0;
           left: 0;
@@ -878,57 +841,14 @@ export default function HomeV2() {
           height: 100%;
           z-index: 0;
           overflow: hidden;
-          background: 
-            radial-gradient(ellipse at 20% 80%, rgba(15, 118, 110, 0.6) 0%, rgba(13, 148, 136, 0.4) 35%, transparent 65%),
-            radial-gradient(circle at 80% 20%, rgba(5, 150, 105, 0.5) 0%, rgba(17, 94, 89, 0.6) 40%, transparent 70%),
-            radial-gradient(ellipse at 40% 40%, rgba(20, 184, 166, 0.4) 0%, rgba(15, 118, 110, 0.5) 30%, transparent 60%),
-            linear-gradient(135deg, #0f766e 0%, #134e4a 100%);
-          background-size: 250% 250%, 200% 200%, 220% 220%, 100% 100%;
-          animation: liquidFlow 18s ease-in-out infinite;
-        }
-        
-        .gradient-background::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
+          pointer-events: none;
           background-image: url(/noise-light.png);
-          background-size: 100px 100px;
+          background-size: 200px 200px;
           background-repeat: repeat;
-          opacity: 0.4;
-          mix-blend-mode: overlay;
+          opacity: 0.3;
+          mix-blend-mode: multiply;
         }
         
-        .gradient-background::after {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: 
-            radial-gradient(ellipse at var(--mouse-x, 50)% var(--mouse-y, 50)%, rgba(255, 255, 255, 0.03) 0%, transparent 60%),
-            radial-gradient(circle at calc(var(--mouse-x, 50)% + 30%) calc(var(--mouse-y, 50)% - 20%), rgba(15, 118, 110, 0.4) 0%, transparent 40%);
-          background-size: 100% 100%, 80% 80%;
-          transition: background-position 0.8s cubic-bezier(0.23, 1, 0.320, 1);
-        }
-        
-        @keyframes liquidFlow {
-          0%, 100% {
-            background-position: 0% 0%, 100% 100%, 50% 50%, 0% 0%;
-            background-size: 250% 250%, 200% 200%, 220% 220%, 100% 100%;
-          }
-          33% {
-            background-position: 70% 30%, 20% 80%, 80% 20%, 0% 0%;
-            background-size: 280% 220%, 240% 180%, 200% 250%, 100% 100%;
-          }
-          66% {
-            background-position: 100% 100%, 0% 0%, 30% 70%, 0% 0%;
-            background-size: 220% 280%, 180% 240%, 250% 200%, 100% 100%;
-          }
-        }
         
         @keyframes gradientShift_old {
           0%, 100% {
@@ -1405,17 +1325,13 @@ export default function HomeV2() {
               fontWeight: '300',
               lineHeight: '0.9',
               letterSpacing: '-0.03em',
-              color: '#ffffff',
+              color: '#000000',
               margin: 0,
               textAlign: 'left'
             }}>
               Collective is for<br />
               <span style={{
-                background: 'linear-gradient(135deg, #f4e4c2 0%, #e6d3ab 25%, #f7e9c7 50%, #e8d5ae 75%, #f4e4c2 100%)',
-                backgroundClip: 'text',
-                WebkitBackgroundClip: 'text',
-                color: 'transparent',
-                textShadow: '0 2px 4px rgba(212, 184, 150, 0.3)'
+                color: '#000000'
               }}>
                 storytelling
               </span>
@@ -1436,7 +1352,7 @@ export default function HomeV2() {
               fontFamily: '"ABC Whyte", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif',
               fontSize: 'clamp(1rem, 2vw, 1.25rem)',
               fontWeight: '400',
-              color: '#ffffff',
+              color: '#000000',
               margin: 0,
               lineHeight: '1.5'
             }}>
@@ -1461,18 +1377,14 @@ export default function HomeV2() {
               fontWeight: '300',
               lineHeight: '0.9',
               letterSpacing: '-0.03em',
-              color: '#ffffff',
+              color: '#000000',
               margin: 0,
               marginBottom: '1.5rem',
               textAlign: 'left'
             }}>
               Collective is for<br />
               <span style={{
-                background: 'linear-gradient(135deg, #f4e4c2 0%, #e6d3ab 25%, #f7e9c7 50%, #e8d5ae 75%, #f4e4c2 100%)',
-                backgroundClip: 'text',
-                WebkitBackgroundClip: 'text',
-                color: 'transparent',
-                textShadow: '0 2px 4px rgba(212, 184, 150, 0.3)'
+                color: '#000000'
               }}>
                 storytelling
               </span>
@@ -1482,7 +1394,7 @@ export default function HomeV2() {
               fontFamily: '"ABC Whyte", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif',
               fontSize: '1.25rem',
               fontWeight: '400',
-              color: '#ffffff',
+              color: '#000000',
               margin: 0,
               lineHeight: '1.5'
             }}>
