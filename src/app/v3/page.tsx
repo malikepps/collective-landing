@@ -8,7 +8,7 @@ import ScatteredBubblesSection from "./components/ScatteredBubblesSection";
 import PresentSection from "./components/PresentSection";
 import HowItWorksSection from "./components/HowItWorksSection";
 import HeroSlideshowBackground from "./components/HeroSlideshowBackground";
-import TornPaperTransition from "./components/TornPaperTransition";
+// import TornPaperTransition from "./components/TornPaperTransition";
 import { useScrollAnimations } from "./hooks/useScrollAnimations";
 
 // Hero slide interface (for future use)

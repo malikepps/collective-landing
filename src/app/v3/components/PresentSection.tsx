@@ -10,17 +10,13 @@ interface StatItem {
 
 interface PresentSectionProps {
   title: string;
-  content: string;
   backgroundColor: 'light-green' | 'light-blue' | 'purple' | 'pink' | 'light-purple';
-  stats?: StatItem[];
   children?: React.ReactNode;
 }
 
 export default function PresentSection({ 
   title, 
-  content, 
   backgroundColor,
-  stats,
   children 
 }: PresentSectionProps) {
   const getSectionClass = () => {
@@ -207,7 +203,7 @@ export default function PresentSection({
                 Asking for donations is hard work. It is a lot easier to invite people into your organization, giving them an opportunity to see themselves as joining a community of others who believe in your mission.
               </p>
               <p>
-                Imagine a world where your organization's hard work to produce content that engages your community actually reached your entire community. We think that is only possible in a space that you own, not big tech companies.
+                Imagine a world where your organization&apos;s hard work to produce content that engages your community actually reached your entire community. We think that is only possible in a space that you own, not big tech companies.
               </p>
             </div>
             {children}

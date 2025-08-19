@@ -241,7 +241,7 @@ export default function HowItWorksSection({ className = "" }: HowItWorksSectionP
             {/* Second Text Bubble */}
             <div className="text-bubble">
               <p>
-                We want to help you build a thriving community of supporters, quickly. Here's how:
+                We want to help you build a thriving community of supporters, quickly. Here&apos;s how:
               </p>
             </div>
           </div>

@@ -21,7 +21,6 @@ export default function SpeechBubblesSection({ className = "" }: SpeechBubblesSe
       const secondBubbleRect = secondBubbleRef.current.getBoundingClientRect();
       
       const viewportHeight = window.innerHeight;
-      const sectionCenter = sectionRect.top + sectionRect.height / 2;
       const viewportCenter = viewportHeight / 2;
 
       // Calculate which bubble is closer to the center of the viewport
