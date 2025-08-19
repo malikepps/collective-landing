@@ -744,9 +744,6 @@ export default function HomeV3() {
       {/* Section 4: Present-Style Section (Light Purple) */}
       <PresentSection 
         title="Collective deepens your relationships through content and community"
-        content="Asking for donations is hard work. It is a lot easier to invite people into your organization, giving them an opportunity to see themselves as joining a community of others who believe in your mission.
-
-Imagine a world where your organization's hard work to produce content that engages your community actually reached your entire community. We think that is only possible in a space that you own, not big tech companies."
         backgroundColor="light-purple"
       />
 
@@ -756,21 +753,18 @@ Imagine a world where your organization's hard work to produce content that enga
       {/* Section 6: Present1-Style Section (Light Blue) */}
       <PresentSection 
         title="Present1 Section"
-        content="Content inspired by /present1/ design patterns will go here."
         backgroundColor="light-blue"
       />
 
       {/* Section 7: Present2-Style Section (Light Purple) */}
       <PresentSection 
         title="Present2 Section"
-        content="Content inspired by /present2/ design patterns will go here."
         backgroundColor="purple"
       />
 
       {/* Section 8: Present3-Style Section (Light Pink) */}
       <PresentSection 
         title="Present3 Section"
-        content="Content inspired by /present3/ design patterns will go here."
         backgroundColor="pink"
       />
     </div>

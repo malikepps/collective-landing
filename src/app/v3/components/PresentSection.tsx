@@ -2,11 +2,6 @@
 
 import React from "react";
 
-interface StatItem {
-  percentage: number;
-  title: string;
-  description: string;
-}
 
 interface PresentSectionProps {
   title: string;
