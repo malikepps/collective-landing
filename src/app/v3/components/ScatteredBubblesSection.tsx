@@ -50,16 +50,25 @@ export default function ScatteredBubblesSection() {
         .animation-container {
           transition: all 0.3s ease-out; /* Quick transition for scroll-triggered animation */
         }
+        
+        .scattered-bubbles-section {
+          background-image: url(/noise-light.png) !important;
+          background-size: 100px 100px !important;
+          background-repeat: repeat !important;
+        }
       `}</style>
       <section 
         className="v3-section v3-section-teal scattered-bubbles-section"
         style={{
           position: 'relative',
           width: '100%',
-                  height: isMobile ? '100vh' : '70vh', // Much taller on mobile
-        minHeight: isMobile ? '900px' : '600px', // Higher minimum on mobile
-        overflow: 'visible', // Changed to visible to prevent cutoff
-        paddingTop: isMobile ? '4rem' : '6rem' // Much more padding on desktop for animation space
+          height: isMobile ? '100vh' : '70vh', // Much taller on mobile
+          minHeight: isMobile ? '900px' : '600px', // Higher minimum on mobile
+          overflow: 'visible', // Changed to visible to prevent cutoff
+          paddingTop: isMobile ? '4rem' : '6rem', // Much more padding on desktop for animation space
+          backgroundImage: 'url(/noise-light.png)',
+          backgroundSize: '100px 100px',
+          backgroundRepeat: 'repeat'
         }}
       >
       {/* Content container */}

@@ -6,6 +6,8 @@ import React from "react";
 import SpeechBubblesSection from "./components/SpeechBubblesSection";
 import ScatteredBubblesSection from "./components/ScatteredBubblesSection";
 import PresentSection from "./components/PresentSection";
+import HowItWorksSection from "./components/HowItWorksSection";
+import HeroSlideshowBackground from "./components/HeroSlideshowBackground";
 import TornPaperTransition from "./components/TornPaperTransition";
 import { useScrollAnimations } from "./hooks/useScrollAnimations";
 
@@ -322,7 +324,7 @@ export default function HomeV3() {
           transform: translateY(10px);
           animation: bubbleAppear 0.6s ease-out forwards;
         }
-
+        
         .v3-title-bubble.blue,
         .v3-title-bubble.yellow {
           border-radius: 35px;
@@ -330,7 +332,8 @@ export default function HomeV3() {
 
         .v3-title-bubble.neutral {
           background-color: transparent;
-          color: var(--primary-teal);
+          color: var(--primary-white);
+          border: none;
         }
 
         .v3-title-bubble.yellow {
@@ -460,17 +463,18 @@ export default function HomeV3() {
 
         /* Hero Section Specific Styles */
         .v3-hero-section {
-          background-color: var(--accent-light-green);
-          color: var(--primary-teal);
-          min-height: 90vh;
+          background-color: transparent;
+          color: var(--primary-white);
+          min-height: 100vh;
           display: flex;
           align-items: center;
           justify-content: center;
           position: relative;
-          padding-bottom: 4rem;
+          padding-bottom: 0;
           width: 100%;
           max-width: 100vw;
           overflow-x: hidden;
+          overflow-y: visible;
         }
 
         .v3-hero-subtitle {
@@ -481,8 +485,93 @@ export default function HomeV3() {
           text-align: center;
           max-width: 500px;
           margin: 3rem auto 0 auto;
-          opacity: 0.8;
+          opacity: 1;
           color: var(--primary-teal);
+          background-color: #DEDDFF;
+          padding: 1.5rem 2rem;
+          border-radius: 16px;
+          border: 2px solid var(--primary-teal);
+          backdrop-filter: none;
+        }
+        
+        .v3-hero-subtitle .highlight {
+          color: var(--primary-teal);
+          font-weight: var(--font-weight-medium);
+        }
+
+        /* Simplified Hero Title */
+        .v3-hero-title-simple {
+          font-family: "Anton", sans-serif;
+          font-size: 5rem;
+          font-weight: 400;
+          line-height: 1.1;
+          letter-spacing: -0.02em;
+          text-align: left;
+          color: var(--primary-white);
+          margin: 0;
+          text-transform: uppercase;
+          text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+          max-width: 90vw;
+          position: relative;
+        }
+
+        .v3-hero-title-simple .line-1 {
+          display: block;
+          margin-bottom: 0.2em;
+        }
+
+        .v3-hero-title-simple .line-2 {
+          display: block;
+          margin-left: 2rem;
+        }
+
+        .v3-hero-title-simple .highlight {
+          color: #DEDDFF;
+        }
+
+        @media screen and (min-width: 30em) {
+          .v3-hero-title-simple {
+            font-size: 7rem;
+            line-height: 1.05;
+          }
+          
+          .v3-hero-title-simple .line-2 {
+            margin-left: 2.5rem;
+            white-space: nowrap;
+          }
+        }
+
+        @media screen and (min-width: 48em) {
+          .v3-hero-title-simple {
+            font-size: 9rem;
+            line-height: 1.0;
+          }
+          
+          .v3-hero-title-simple .line-2 {
+            margin-left: 3rem;
+          }
+        }
+
+        @media screen and (min-width: 64em) {
+          .v3-hero-title-simple {
+            font-size: 11rem;
+            line-height: 0.95;
+          }
+          
+          .v3-hero-title-simple .line-2 {
+            margin-left: 3.5rem;
+          }
+        }
+
+        @media screen and (min-width: 80em) {
+          .v3-hero-title-simple {
+            font-size: 13rem;
+            line-height: 0.9;
+          }
+          
+          .v3-hero-title-simple .line-2 {
+            margin-left: 4rem;
+          }
         }
 
         @media screen and (min-width: 30em) {
@@ -500,51 +589,150 @@ export default function HomeV3() {
         }
       `}</style>
 
-      {/* Section 1: Hero Section (Bubble Style) */}
-      <section className="v3-hero-section">
+      {/* Section 1: Hero Section (Bubble Style with Slideshow Background) */}
+      <section className="v3-hero-section" style={{ position: 'relative' }}>
+        {/* Hero Slideshow Background */}
+        <HeroSlideshowBackground />
+        
+        {/* Navigation Bar */}
+        <nav style={{
+          position: 'absolute',
+          top: '2rem',
+          left: '2rem',
+          right: '2rem',
+          zIndex: 30,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0 2rem'
+        }}>
+          {/* Left Navigation */}
+          <div style={{
+            display: 'flex',
+            gap: '3rem',
+            alignItems: 'center'
+          }}>
+            <button style={{
+              background: 'none',
+              border: 'none',
+              color: 'white',
+              fontFamily: 'ABC Whyte, sans-serif',
+              fontSize: '1.2rem',
+              fontWeight: '400',
+              cursor: 'pointer',
+              textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)'
+            }}>
+              Mission
+            </button>
+            <button style={{
+              background: 'none',
+              border: 'none',
+              color: 'white',
+              fontFamily: 'ABC Whyte, sans-serif',
+              fontSize: '1.2rem',
+              fontWeight: '400',
+              cursor: 'pointer',
+              textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)'
+            }}>
+              Product
+            </button>
+            <button style={{
+              background: 'none',
+              border: 'none',
+              color: 'white',
+              fontFamily: 'ABC Whyte, sans-serif',
+              fontSize: '1.2rem',
+              fontWeight: '400',
+              cursor: 'pointer',
+              textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)'
+            }}>
+              FAQs
+            </button>
+          </div>
+
+          {/* Center Logo */}
+          <div style={{
+            position: 'absolute',
+            left: '50%',
+            transform: 'translateX(-50%)'
+          }}>
+            <img 
+              src="/images/Collective logo v5 White (2).png" 
+              alt="Collective"
+              style={{
+                height: '40px',
+                width: 'auto'
+              }}
+            />
+          </div>
+
+          {/* Right Buttons */}
+          <div style={{
+            display: 'flex',
+            gap: '1.2rem',
+            alignItems: 'center'
+          }}>
+            <button style={{
+              background: 'transparent',
+              border: '2px solid white',
+              color: 'white',
+              fontFamily: 'ABC Whyte, sans-serif',
+              fontSize: '1.1rem',
+              fontWeight: '400',
+              cursor: 'pointer',
+              padding: '0.75rem 1.5rem',
+              borderRadius: '30px',
+              textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
+              transition: 'all 0.2s ease'
+            }}>
+              Log in
+            </button>
+            <button style={{
+              background: '#DEDDFF',
+              border: '2px solid var(--primary-teal)',
+              color: 'var(--primary-teal)',
+              fontFamily: 'ABC Whyte, sans-serif',
+              fontSize: '1.1rem',
+              fontWeight: '500',
+              cursor: 'pointer',
+              padding: '0.75rem 1.5rem',
+              borderRadius: '30px',
+              transition: 'all 0.2s ease'
+            }}>
+              Get started
+            </button>
+          </div>
+        </nav>
+        
         <div style={{
           textAlign: 'center',
           padding: '4rem 2rem',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          position: 'relative',
+          zIndex: 25
         }}>
-          {/* Bubble/Pill Style Title */}
-          <div className="v3-hero-title-bubbles top-row">
-            <div className="v3-title-bubble neutral small">
-              give
-            </div>
-            <div className="v3-title-bubble blue medium">
-              back
-            </div>
-            <div className="v3-title-bubble neutral small">
-              to
-            </div>
-          </div>
-          
-          <div className="v3-hero-title-bubbles bottom-row">
-            <div className="v3-title-bubble neutral small">
-              your
-            </div>
-            <div className="v3-title-bubble yellow large">
-              donors
-            </div>
-          </div>
+          {/* Simplified Hero Title */}
+          <h1 className="v3-hero-title-simple">
+            <span className="line-1">Give <span className="highlight">back</span></span>
+            <span className="line-2">to your donors</span>
+          </h1>
 
           <p className="v3-hero-subtitle">
-            Collective is building a new digital home where nonprofits tell their stories, build community, and grow sustainably.
+            Collective is a <span className="highlight">new digital home</span> where nonprofits tell their stories, build community, and grow sustainably.
           </p>
         </div>
       </section>
 
-      {/* Torn Paper Transition (Positioned higher to be visible in viewport) */}
-      <div style={{ marginTop: '-2rem', position: 'relative', zIndex: 10 }}>
+      {/* Torn Paper Transition - Hidden for now */}
+      {/* <div style={{ marginTop: '-45px', position: 'relative', zIndex: 30 }}>
         <TornPaperTransition />
-      </div>
+      </div> */}
 
       {/* Section 2: Speech Bubbles Section (Teal Background) */}
-      <div style={{ marginTop: '-2rem', position: 'relative', zIndex: 5 }}>
+      <div style={{ position: 'relative', zIndex: 5 }}>
         <SpeechBubblesSection />
       </div>
 
@@ -555,26 +743,31 @@ export default function HomeV3() {
 
       {/* Section 4: Present-Style Section (Light Purple) */}
       <PresentSection 
-        title="More connections start with deeper connections"
-        content="Social media alone can only take your message so far. We're building Collective to be a space that you own, to do what you do best."
+        title="Collective deepens your relationships through content and community"
+        content="Asking for donations is hard work. It is a lot easier to invite people into your organization, giving them an opportunity to see themselves as joining a community of others who believe in your mission.
+
+Imagine a world where your organization's hard work to produce content that engages your community actually reached your entire community. We think that is only possible in a space that you own, not big tech companies."
         backgroundColor="light-purple"
       />
 
-      {/* Section 5: Present1-Style Section (Light Blue) */}
+      {/* Section 5: How It Works Section (Teal Background) */}
+      <HowItWorksSection />
+
+      {/* Section 6: Present1-Style Section (Light Blue) */}
       <PresentSection 
         title="Present1 Section"
         content="Content inspired by /present1/ design patterns will go here."
         backgroundColor="light-blue"
       />
 
-      {/* Section 6: Present2-Style Section (Light Purple) */}
+      {/* Section 7: Present2-Style Section (Light Purple) */}
       <PresentSection 
         title="Present2 Section"
         content="Content inspired by /present2/ design patterns will go here."
         backgroundColor="purple"
       />
 
-      {/* Section 7: Present3-Style Section (Light Pink) */}
+      {/* Section 8: Present3-Style Section (Light Pink) */}
       <PresentSection 
         title="Present3 Section"
         content="Content inspired by /present3/ design patterns will go here."
